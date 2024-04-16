@@ -1,0 +1,8 @@
+add_pool pool1
+add_pool pool2
+add_schema pool1 schema1
+add_schema pool2 schema2
+add_collection pool1 schema1 collection1
+add_collection pool2 schema2 collection2
+remove_schema pool1 schema2
+remove_collection pool2 schema2 collection2
