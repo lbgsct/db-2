@@ -1,0 +1,75 @@
+/*package main
+
+import (
+	"context"
+	"testing"
+	"time"
+)
+
+func TestGetCollection(t *testing.T) {
+	// Создаем контекст с отменой по истечении времени выполнения теста
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	cm := NewCollectionManager(ctx)
+
+	poolName := "test-pool"
+	schemaName := "test-schema"
+	collectionName := "test-collection"
+
+	cm.AddPool(poolName)
+	cm.AddSchema(poolName, schemaName)
+
+	testData := map[string]string{
+		"key1": "value1",
+		"key2": "value2",
+		"key3": "value3",
+	}
+
+	collection := NewDataCollection(poolName, schemaName, collectionName, ctx)
+	cm.AddCollection(poolName, schemaName, collectionName, collection)
+
+	// Добавляем данные в коллекцию
+	chain := NewChain(collection)
+	chain.AddCommand(&ConcreteCommand{collection: collection, commandType: "Add", key: "key1", value: "value1"})
+	chain.AddCommand(&ConcreteCommand{collection: collection, commandType: "Add", key: "key2", value: "value2"})
+	chain.AddCommand(&ConcreteCommand{collection: collection, commandType: "Add", key: "key3", value: "value3"})
+
+	done := make(chan struct{})
+	go func() {
+		chain.ExecuteAll()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-ctx.Done():
+		t.Fatal("Таймаут выполнения команд")
+	}
+
+	currentTime := time.Now()
+	testTime := currentTime.Add(-1 * time.Hour)
+
+	// Получение текущих данных коллекции
+	currentData := cm.GetCollection(poolName, schemaName, collectionName, currentTime)
+	if len(currentData) != len(testData) {
+		t.Errorf("Ожидается %d элементов, получено %d", len(testData), len(currentData))
+	}
+
+	// Получение данных коллекции на заданный момент времени
+	historicalData := cm.GetCollection(poolName, schemaName, collectionName, testTime)
+	if len(historicalData) != len(testData) {
+		t.Errorf("Ожидается %d элементов, получено %d", len(testData), len(historicalData))
+	}
+
+	// Проверка конкретных значений данных
+	for key, value := range testData {
+		if currentData[key] != value {
+			t.Errorf("Неверное значение для ключа %s в текущих данных. Ожидалось: %s, Получено: %s", key, value, currentData[key])
+		}
+		if historicalData[key] != value {
+			t.Errorf("Неверное значение для ключа %s в исторических данных. Ожидалось: %s, Получено: %s", key, value, historicalData[key])
+		}
+	}
+}
+*/
