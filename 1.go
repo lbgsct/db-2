@@ -33,6 +33,7 @@ func RunCommand(pools *AllPools, command string) error {
 			return err
 		}
 		pool.AddSchema(args[2])
+        fmt.Println(args[1])
 	case "remove-schema":
 		if len(args) < 3 {
 			return fmt.Errorf("Недостаточно аргументов для команды remove-schema.")
@@ -41,7 +42,8 @@ func RunCommand(pools *AllPools, command string) error {
 		if err != nil {
 			return err
 		}
-		pool.PopSchema(args[2])
+		pool.RemoveSchema(args[2])
+        fmt.Println(args[1])
 	case "add-collection":
 		if len(args) < 4 {
 			return fmt.Errorf("Недостаточно аргументов для команды add-collection.")
@@ -58,6 +60,7 @@ func RunCommand(pools *AllPools, command string) error {
 		if err = schema.AddCollection(args[3], collection); err != nil {
 			return err
 		}
+        fmt.Println(args[2], "в пул ", args[1])
 	case "remove-collection":
 		if len(args) < 4 {
 			return fmt.Errorf("Недостаточно аргументов для команды remove-collection.")
@@ -70,7 +73,8 @@ func RunCommand(pools *AllPools, command string) error {
 		if err != nil {
 			return err
 		}
-		schema.PopCollection(args[3])
+		schema.RemoveCollection(args[3])
+        fmt.Println(args[2], "из пула", args[1])
 	case "add-record":
 		if len(args) < 5 {
 			return fmt.Errorf("Недостаточно аргументов для команды add-record.")

@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"time"
 )
 
 // Интерфейс для ассоциативного контейнера который производит операции над коллекцией.
@@ -34,12 +35,16 @@ func (mc *MapCollection) Insert(key string, value interface{}) error {
 	return nil
 }
 
-func (mc *MapCollection) Get(key string) (interface{}, error) {
+/*func (mc *MapCollection) Get(key string) (interface{}, error) {
 	value, exists := mc.data[key]
 	if !exists {
 		return nil, errors.New("Элемент не найден!")
 	}
 	return value, nil
+}*/
+func (mc *MapCollection) Get(key string, time time.Time, pools *AllPools) (interface{}, error) {
+	timeHandler := &TimeHandler{pool: pools, time: time}
+	return timeHandler.HandleRequest(key)
 }
 
 func (mc *MapCollection) GetRange(minValue, maxValue string) ([]string, error) {
@@ -52,7 +57,16 @@ func (mc *MapCollection) GetRange(minValue, maxValue string) ([]string, error) {
 	return result, nil
 }
 
-func (mc *MapCollection) Update(key string, value interface{}) error {
+func (mc *MapCollection) Update(key string, value interface{}, pools *AllPools) error {
+	saveCmd := &SaveCommand{
+		pool:       pools,
+		schemaName: "mainSchema",
+		collection: "mainCollection",
+		key:        key,
+		value:      value,
+	}
+	saveCmd.Execute()
+	
 	if _, exists := mc.data[key]; !exists {
 		return errors.New("Элемент не найден!")
 	}
@@ -77,6 +91,7 @@ type AllPools struct {
 	pools map[string]*Pool
 }
 
+
 func InitPool() *AllPools {
 	return &AllPools{
 		pools: make(map[string]*Pool),
@@ -93,12 +108,23 @@ func (pools *AllPools) AddPool(name string) {
 }
 
 func (pools *AllPools) RemovePool(name string) {
-    if _, exists := pools.pools[name]; exists {
-        delete(pools.pools, name)
-        fmt.Println("Пул с именем", name, "удален.")
-    } else {
-        fmt.Println("Пул с именем", name, "не существует.")
-    }
+	if pool, exists := pools.pools[name]; exists {
+		// Удаляем все схемы и их коллекции
+		for schemaName := range pool.schema {
+			schema := pool.schema[schemaName]
+			// Удаляем все коллекции в схеме
+			for collectionName := range schema.collection {
+				schema.RemoveCollection(collectionName)
+			}
+			// Удаляем схему
+			pool.RemoveSchema(schemaName)
+		}
+		// Удаляем пул
+		delete(pools.pools, name)
+		fmt.Println("Пул с именем", name, "удален.")
+	} else {
+		fmt.Println("Пул с именем", name, "не существует.")
+	}
 }
 
 
@@ -127,12 +153,22 @@ func (pool *Pool) GetSchema(schemaName string) (*Schema, error) {
 func (pool *Pool) AddSchema(name string) {
 
     pool.schema[name] = InitSchema()
-    fmt.Println("Схема с именем", name, "добавлена в пул.")
+    fmt.Print("Схема с именем ", name, " добавлена в пул ")
 }
 
 
-func (pool *Pool) PopSchema(name string) {
-	delete(pool.schema, name)
+func (pool *Pool) RemoveSchema(name string) {
+	if schema, exists := pool.schema[name]; exists {
+		// Удаляем все коллекции в схеме
+		for collectionName := range schema.collection {
+			schema.RemoveCollection(collectionName)
+		}
+		// Удаляем схему из пула
+		delete(pool.schema, name)
+		fmt.Println("Схема с именем", name, "удалена из пула")
+	} else {
+		fmt.Println("Схема с именем", name, "не найдена в пуле")
+	}
 }
 
 type Schema struct {
@@ -158,10 +194,11 @@ func (schema *Schema) AddCollection(name string, collection Collection) error {
 		return errors.New("Коллекция с таким именем уже существует!")
 	}
 	schema.collection[name] = collection
-	fmt.Println("Коллекция с именем", name, "добавлена в схему.")
+	fmt.Print("Коллекция с именем ", name, " добавлена в схему ")
 	return nil
 }
 
-func (schema *Schema) PopCollection(name string) {
+func (schema *Schema) RemoveCollection(name string) {
 	delete(schema.collection, name)
+	fmt.Print("Коллекция с именем ", name, " удалена из схемы ")
 }
