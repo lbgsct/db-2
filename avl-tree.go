@@ -23,6 +23,64 @@ func NewAVLTree() *AVLTree {
 	return &AVLTree{}
 }
 
+// Insert вставляет новый ключ со значением в дерево
+func (avl *AVLTree) Insert(key string, value interface{}) error {
+	var err error
+	avl.root, err = insert(avl.root, key, value)
+	return err
+}
+
+// Get возвращает значение, связанное с заданным ключом
+func (avl *AVLTree) Get(key string) (interface{}, error) {
+	node, err := getNode(avl.root, key)
+	if err != nil {
+		return nil, err
+	}
+	return node.value, nil
+}
+
+// GetRange возвращает список ключей в заданном диапазоне значений
+func (avl *AVLTree) GetRange(minValue, maxValue string) ([]string, error) {
+	var result []string
+	var getRangeHelper func(node *Node, minValue, maxValue string)
+	getRangeHelper = func(node *Node, minValue, maxValue string) {
+		if node == nil {
+			return
+		}
+		if node.key >= minValue {
+			getRangeHelper(node.left, minValue, maxValue)
+		}
+		if node.key >= minValue && node.key <= maxValue {
+			result = append(result, node.key)
+		}
+		if node.key <= maxValue {
+			getRangeHelper(node.right, minValue, maxValue)
+		}
+	}
+	getRangeHelper(avl.root, minValue, maxValue)
+	return result, nil
+}
+
+// Update обновляет значение, связанное с заданным ключом
+func (avl *AVLTree) Update(key string, value interface{}) error {
+	node, err := getNode(avl.root, key)
+	if err != nil {
+		return err
+	}
+	node.value = value
+	return nil
+}
+
+// Remove удаляет узел с заданным ключом из дерева
+func (avl *AVLTree) Remove(key string) error {
+	var err error
+	avl.root, err = deleteNode(avl.root, key)
+	return err
+}
+
+
+
+
 // height возвращает высоту узла
 func height(node *Node) int {
 	if node == nil {
@@ -265,7 +323,7 @@ func (avl *AVLCollection) GetRange(minValue, maxValue string) ([]string, error) 
 			getRangeHelper(node.left, minValue, maxValue)
 		}
 		if node.key >= minValue && node.key <= maxValue {
-			result = append(result, node.key)
+			result = append(result, node.key) // конвертируем node.key в строку
 		}
 		if node.key <= maxValue {
 			getRangeHelper(node.right, minValue, maxValue)
@@ -274,6 +332,7 @@ func (avl *AVLCollection) GetRange(minValue, maxValue string) ([]string, error) 
 	getRangeHelper(avl.tree.root, minValue, maxValue)
 	return result, nil
 }
+
 
 func (avl *AVLCollection) Update(key string, value interface{}) error {
 	node, err := getNode(avl.tree.root, key)

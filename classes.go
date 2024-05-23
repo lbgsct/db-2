@@ -23,9 +23,9 @@ func NewTreeCollection(treeType string) *TreeCollection {
 	var tree Tree
 	switch treeType {
 	case "avl":
-		tree = NewAVLTree()
-	case "redblack":
-		tree = NewRedBlackTree()
+		tree = Tree(NewAVLTree())
+	/*case "redblack":
+		tree = NewRedBlackTree()*/
 	default:
 		tree = NewAVLTree() // По умолчанию используем AVL-дерево
 	}
