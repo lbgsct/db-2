@@ -7,13 +7,52 @@ import (
 )
 
 // Интерфейс для ассоциативного контейнера который производит операции над коллекцией.
-type Collection interface {
+type Tree interface {
 	Insert(key string, value interface{}) error
 	Get(key string) (interface{}, error)
 	GetRange(minValue, maxValue string) ([]string, error)
 	Update(key string, value interface{}) error
 	Remove(key string) error
 }
+
+type TreeCollection struct {
+	tree Tree
+}
+
+func NewTreeCollection(treeType string) *TreeCollection {
+	var tree Tree
+	switch treeType {
+	case "avl":
+		tree = NewAVLTree()
+	case "redblack":
+		tree = NewRedBlackTree()
+	default:
+		tree = NewAVLTree() // По умолчанию используем AVL-дерево
+	}
+	return &TreeCollection{tree: tree}
+}
+
+func (tc *TreeCollection) Insert(key string, value interface{}) error {
+	return tc.tree.Insert(key, value)
+}
+
+func (tc *TreeCollection) Get(key string) (interface{}, error) {
+	return tc.tree.Get(key)
+}
+
+func (tc *TreeCollection) GetRange(minValue, maxValue string) ([]string, error) {
+	return tc.tree.GetRange(minValue, maxValue)
+}
+
+func (tc *TreeCollection) Update(key string, value interface{}) error {
+	return tc.tree.Update(key, value)
+}
+
+func (tc *TreeCollection) Remove(key string) error {
+	return tc.tree.Remove(key)
+}
+
+
 
 // Пример реализации интерфейса Collection на основе map.
 type MapCollection struct {
